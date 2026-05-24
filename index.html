@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Money Agency — Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0c;
+    --surface: #141414;
+    --surface2: #1c1c1c;
+    --gold: #c9a84c;
+    --gold2: #e8c97a;
+    --gold-dim: rgba(201,168,76,0.12);
+    --border: rgba(201,168,76,0.15);
+    --border2: rgba(255,255,255,0.06);
+    --text: #f0ece3;
+    --muted: #6b6560;
+    --danger: #e05252;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 50% -10%, rgba(201,168,76,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 90% 100%, rgba(201,168,76,0.04) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* LOGIN */
+  #loginScreen {
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+    padding: 20px;
+  }
+
+  .login-box {
+    width: 380px; max-width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    background: var(--surface);
+    box-shadow: 0 0 80px rgba(201,168,76,0.08);
+    animation: fadeUp 0.4s ease;
+  }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  .login-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px; font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .login-sub {
+    text-align: center; font-size: 12px; color: var(--muted);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  .login-field { margin-bottom: 14px; }
+  .login-field label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 7px; }
+  .login-field input, .login-field select {
+    width: 100%; background: var(--surface2);
+    border: 1px solid var(--border2); color: var(--text);
+    border-radius: 10px; padding: 11px 14px;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-field input:focus, .login-field select:focus { border-color: var(--gold); }
+  .login-field select option { background: #1c1c1c; }
+
+  .login-btn {
+    width: 100%; padding: 13px;
+    background: var(--gold); border: none; color: #0c0c0c;
+    border-radius: 10px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    letter-spacing: 0.04em; margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .login-btn:hover { background: var(--gold2); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,168,76,0.3); }
+
+  .login-error { color: var(--danger); font-size: 12px; text-align: center; margin-top: 10px; display: none; }
+
+  /* HEADER */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    height: 58px;
+    background: rgba(12,12,12,0.92);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 700;
+    color: var(--gold); letter-spacing: 0.04em;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-badge {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.1em;
+    border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px;
+  }
+
+  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 500;
+  }
+  .user-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+
+  .btn-primary {
+    background: var(--gold); color: #0c0c0c; border: none;
+    padding: 8px 18px; border-radius: 8px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+    transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-primary:hover { background: var(--gold2); box-shadow: 0 4px 16px rgba(201,168,76,0.3); }
+
+  .btn-logout {
+    background: transparent; border: 1px solid var(--border2);
+    color: var(--muted); padding: 7px 14px; border-radius: 8px;
+    cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-logout:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+
+  /* FILTERS */
+  .toolbar {
+    position: relative; z-index: 1;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border2);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  }
+
+  .filter-tabs { display: flex; gap: 4px; }
+  .ftab {
+    padding: 6px 14px; border-radius: 7px;
+    border: 1px solid transparent; background: transparent;
+    color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 600;
+    font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+  }
+  .ftab:hover { color: var(--text); background: var(--surface2); }
+  .ftab.active { background: var(--gold-dim); border-color: var(--border); color: var(--gold); }
+
+  .sync-status { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* STATS */
+  .stats {
+    position: relative; z-index: 1;
+    padding: 10px 24px; display: flex; gap: 8px; overflow-x: auto;
+    border-bottom: 1px solid var(--border2);
+  }
+  .stat {
+    display: flex; align-items: center; gap: 7px; flex-shrink: 0;
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 5px 12px;
+  }
+  .stat .sd { width: 6px; height: 6px; border-radius: 50%; }
+  .stat span { font-size: 11px; color: var(--muted); }
+  .stat strong { font-size: 12px; font-weight: 700; color: var(--text); }
+
+  /* BOARD */
+  .board-wrap { position: relative; z-index: 1; padding: 20px 24px; overflow-x: auto; }
+  .board { display: flex; gap: 14px; align-items: flex-start; min-width: max-content; }
+
+  /* COLUMN */
+  .col {
+    width: 272px; flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    display: flex; flex-direction: column;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .col.drag-over {
+    border-color: var(--gold);
+    box-shadow: 0 0 24px rgba(201,168,76,0.15);
+  }
+
+  .col-head {
+    padding: 14px 14px 11px;
+    border-bottom: 1px solid var(--border2);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .col-title { display: flex; align-items: center; gap: 8px; }
+  .col-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .col-name {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .col-count {
+    background: var(--surface2); color: var(--muted);
+    padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 700;
+  }
+
+  .col-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 60px; flex: 1; }
+
+  .col-add-btn {
+    margin: 0 10px 10px; padding: 9px;
+    background: transparent; border: 1px dashed rgba(201,168,76,0.2);
+    color: var(--muted); cursor: pointer; border-radius: 9px;
+    font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    transition: all 0.15s;
+  }
+  .col-add-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-dim); }
+
+  /* CARD */
+  .card {
+    background: #181818;
+    border: 1px solid var(--border2);
+    border-radius: 12px; padding: 13px;
+    cursor: grab; transition: all 0.15s;
+    animation: cardIn 0.2s ease;
+  }
+  @keyframes cardIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+  .card:hover { background: #1e1e1e; border-color: rgba(201,168,76,0.2); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.4); }
+  .card.dragging { opacity: 0.3; }
+
+  .card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .ctag {
+    padding: 2px 7px; border-radius: 4px;
+    font-size: 9px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .cpriority { width: 6px; height: 6px; border-radius: 50%; margin-left: auto; flex-shrink: 0; }
+  .p-urgent { background: #e05252; box-shadow: 0 0 6px #e05252; }
+  .p-high   { background: #e09352; }
+  .p-normal { background: var(--gold); }
+  .p-low    { background: #52b788; }
+
+  .card-title { font-size: 13px; font-weight: 500; line-height: 1.45; color: var(--text); margin-bottom: 10px; }
+
+  .card-footer { display: flex; align-items: center; justify-content: space-between; }
+  .card-assignee { display: flex; align-items: center; gap: 6px; }
+  .cavatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 800; flex-shrink: 0;
+  }
+  .aname { font-size: 11px; color: var(--muted); }
+  .card-due { font-size: 10px; font-weight: 600; }
+
+  .card-actions { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border2); gap: 6px; }
+  .card:hover .card-actions { display: flex; }
+  .cact {
+    background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--muted); cursor: pointer; border-radius: 6px;
+    padding: 4px 10px; font-size: 11px; font-family: 'DM Sans', sans-serif; font-weight: 600;
+    transition: all 0.15s;
+  }
+  .cact:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+  .cact.del:hover { color: var(--danger); border-color: rgba(224,82,82,0.3); }
+
+  /* MODAL */
+  .modal-bg {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px; width: 400px; max-width: 100%;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    animation: fadeUp 0.2s ease;
+  }
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px; font-weight: 700; color: var(--gold);
+    margin-bottom: 22px;
+  }
+  .mfield { margin-bottom: 14px; }
+  .mfield label { display: block; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .mfield input, .mfield select, .mfield textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--text); border-radius: 10px; padding: 10px 13px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .mfield input:focus, .mfield select:focus, .mfield textarea:focus { border-color: var(--gold); }
+  .mfield select option { background: #1c1c1c; }
+  .mfield textarea { resize: vertical; min-height: 70px; }
+  .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px; }
+  .mbtn-cancel {
+    background: transparent; border: 1px solid var(--border2); color: var(--muted);
+    padding: 10px 20px; border-radius: 10px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    transition: all 0.15s;
+  }
+  .mbtn-cancel:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+  .mbtn-save {
+    background: var(--gold); color: #0c0c0c; border: none;
+    padding: 10px 24px; border-radius: 10px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
+    transition: all 0.15s;
+  }
+  .mbtn-save:hover { background: var(--gold2); }
+
+  /* TEAM BAR */
+  .team-bar {
+    position: relative; z-index: 1;
+    background: var(--surface); border-bottom: 1px solid var(--border2);
+    padding: 10px 24px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  .team-label { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+  .team-member { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #a09890; }
+
+  @media (max-width: 640px) {
+    .board-wrap { padding: 14px; }
+    header { padding: 0 14px; }
+    .logo-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Money Agency</div>
+    <div class="login-sub">Team Board · Вхід</div>
+    <div class="login-field">
+      <label>Ім'я / роль</label>
+      <select id="loginRole">
+        <option value="">— оберіть —</option>
+        <option value="owner">👑 Власниця</option>
+        <option value="proj">🗂 Проджект-менеджер</option>
+        <option value="smm1">✍️ SMM #1</option>
+        <option value="smm2">✍️ SMM #2</option>
+        <option value="target">🎯 Таргетолог</option>
+      </select>
+    </div>
+    <div class="login-field">
+      <label>Пароль</label>
+      <input type="password" id="loginPass" placeholder="••••••">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Увійти</button>
+    <div class="login-error" id="loginErr">Невірний пароль або роль не обрана</div>
+    <div style="margin-top:18px; font-size:11px; color:#4a4540; text-align:center; line-height:1.6">
+      Пароль для всіх: <strong style="color:#6b6560">money2024</strong><br>
+      Власниця може змінювати будь-які задачі
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+<header>
+  <div class="logo">
+    Money Agency
+    <span class="logo-badge">Board</span>
+  </div>
+  <div class="header-right">
+    <div class="user-chip">
+      <div class="user-dot"></div>
+      <span id="userLabel">—</span>
+    </div>
+    <button class="btn-primary" onclick="openModal()">＋ Задача</button>
+    <button class="btn-logout" onclick="doLogout()">Вийти</button>
+  </div>
+</header>
+
+<div class="team-bar">
+  <span class="team-label">Команда</span>
+  <div class="team-member"><div class="cavatar" style="background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:#c9a84c">ВЛ</div> Власниця</div>
+  <div class="team-member"><div class="cavatar" style="background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.25);color:#60a5fa">ПМ</div> Проджект</div>
+  <div class="team-member"><div class="cavatar" style="background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.25);color:#a78bfa">С1</div> SMM #1</div>
+  <div class="team-member"><div class="cavatar" style="background:rgba(244,114,182,0.12);border:1px solid rgba(244,114,182,0.25);color:#f472b6">С2</div> SMM #2</div>
+  <div class="team-member"><div class="cavatar" style="background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.25);color:#34d399">ТГ</div> Таргетолог</div>
+</div>
+
+<div class="toolbar">
+  <div class="filter-tabs">
+    <button class="ftab active" onclick="setFilter('all',this)">Всі</button>
+    <button class="ftab" onclick="setFilter('owner',this)">Власниця</button>
+    <button class="ftab" onclick="setFilter('proj',this)">Проджект</button>
+    <button class="ftab" onclick="setFilter('smm1',this)">SMM #1</button>
+    <button class="ftab" onclick="setFilter('smm2',this)">SMM #2</button>
+    <button class="ftab" onclick="setFilter('target',this)">Таргет</button>
+  </div>
+  <div class="sync-status">
+    <div class="sync-dot"></div>
+    <span id="syncLabel">Синхронізація...</span>
+  </div>
+</div>
+
+<div class="stats" id="statsBar"></div>
+<div class="board-wrap"><div class="board" id="board"></div></div>
+
+</div><!-- /app -->
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Нова задача</div>
+    <div class="mfield"><label>Назва</label><input type="text" id="fTitle" placeholder="Наприклад: Контент-план на червень"></div>
+    <div class="mfield"><label>Колонка</label>
+      <select id="fCol">
+        <option value="backlog">📋 Беклог</option>
+        <option value="todo">🔵 До виконання</option>
+        <option value="inprogress">🟡 В роботі</option>
+        <option value="review">🩷 На погодженні</option>
+        <option value="done">✅ Готово</option>
+      </select>
+    </div>
+    <div class="mfield"><label>Відповідальний</label>
+      <select id="fAssignee">
+        <option value="owner">👑 Власниця</option>
+        <option value="proj">🗂 Проджект-менеджер</option>
+        <option value="smm1">✍️ SMM #1</option>
+        <option value="smm2">✍️ SMM #2</option>
+        <option value="target">🎯 Таргетолог</option>
+      </select>
+    </div>
+    <div class="mfield"><label>Тег</label>
+      <select id="fTag">
+        <option value="project">Project</option>
+        <option value="smm">SMM</option>
+        <option value="target">Target</option>
+        <option value="content">Content</option>
+        <option value="design">Design</option>
+        <option value="client">Client</option>
+      </select>
+    </div>
+    <div class="mfield"><label>Пріоритет</label>
+      <select id="fPriority">
+        <option value="urgent">🔴 Терміново</option>
+        <option value="high">🟠 Високий</option>
+        <option value="normal">🟡 Середній</option>
+        <option value="low">🟢 Низький</option>
+      </select>
+    </div>
+    <div class="mfield"><label>Дедлайн</label><input type="date" id="fDate"></div>
+    <div class="mfield"><label>Нотатка</label><textarea id="fNote" placeholder="Додаткові деталі..."></textarea></div>
+    <div class="modal-btns">
+      <button class="mbtn-cancel" onclick="closeModal()">Скасувати</button>
+      <button class="mbtn-save" onclick="saveCard()">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const PASSWORD = 'money2024';
+const STORAGE_KEY = 'money-agency-board-v2';
+
+const COLS = {
+  backlog:    { name: 'Беклог',         color: '#6b6560' },
+  todo:       { name: 'До виконання',   color: '#60a5fa' },
+  inprogress: { name: 'В роботі',       color: '#c9a84c' },
+  review:     { name: 'На погодженні',  color: '#f472b6' },
+  done:       { name: 'Готово',         color: '#34d399' },
+};
+
+const ASSIGNEES = {
+  owner:  { label: 'Власниця',       short: 'ВЛ', color: '#c9a84c' },
+  proj:   { label: 'Проджект',       short: 'ПМ', color: '#60a5fa' },
+  smm1:   { label: 'SMM #1',         short: 'С1', color: '#a78bfa' },
+  smm2:   { label: 'SMM #2',         short: 'С2', color: '#f472b6' },
+  target: { label: 'Таргетолог',     short: 'ТГ', color: '#34d399' },
+};
+
+const TAGS = {
+  project: { bg: 'rgba(96,165,250,0.12)',  color: '#93c5fd' },
+  smm:     { bg: 'rgba(167,139,250,0.12)', color: '#c4b5fd' },
+  target:  { bg: 'rgba(52,211,153,0.12)',  color: '#6ee7b7' },
+  content: { bg: 'rgba(201,168,76,0.12)',  color: '#e8c97a' },
+  design:  { bg: 'rgba(244,114,182,0.12)', color: '#f9a8d4' },
+  client:  { bg: 'rgba(251,146,60,0.12)',  color: '#fdba74' },
+};
+
+const DEFAULT_CARDS = [
+  { id:1,  col:'todo',       title:'Контент-план: @klient_moda — червень',         tag:'content', assignee:'smm1',   priority:'urgent', due:'2026-06-01', note:'' },
+  { id:2,  col:'todo',       title:'Контент-план: @klient_beauty — червень',       tag:'content', assignee:'smm2',   priority:'urgent', due:'2026-06-01', note:'' },
+  { id:3,  col:'todo',       title:'Запустити рекламну кампанію FB/IG',            tag:'target',  assignee:'target', priority:'urgent', due:'2026-05-28', note:'' },
+  { id:4,  col:'todo',       title:'Зібрати брифи від нових клієнтів',             tag:'project', assignee:'proj',   priority:'high',   due:'2026-05-30', note:'' },
+  { id:5,  col:'inprogress', title:'Пости для @klient_beauty — тиждень 3',        tag:'smm',     assignee:'smm2',   priority:'urgent', due:'2026-05-27', note:'' },
+  { id:6,  col:'inprogress', title:'Сторіс "До/після" — 5 шт.',                   tag:'design',  assignee:'smm1',   priority:'high',   due:'2026-05-28', note:'' },
+  { id:7,  col:'inprogress', title:'Оптимізація аудиторій — @klient_food',        tag:'target',  assignee:'target', priority:'high',   due:'2026-05-27', note:'' },
+  { id:8,  col:'inprogress', title:'Щомісячний звіт — травень',                   tag:'project', assignee:'proj',   priority:'urgent', due:'2026-06-05', note:'' },
+  { id:9,  col:'review',     title:'Пости @klient_moda — тиждень 3 (погодження)', tag:'smm',     assignee:'proj',   priority:'high',   due:'2026-05-25', note:'' },
+  { id:10, col:'review',     title:'Звіт по рекламі за травень',                  tag:'target',  assignee:'target', priority:'urgent', due:'2026-05-26', note:'' },
+  { id:11, col:'done',       title:'Онбординг @klient_beauty — завершено',        tag:'client',  assignee:'proj',   priority:'low',    due:'',           note:'' },
+  { id:12, col:'done',       title:'Контент-план травень — @klient_moda',          tag:'content', assignee:'smm1',   priority:'normal', due:'',           note:'' },
+  { id:13, col:'backlog',    title:'Розробити шаблон контент-плану',               tag:'content', assignee:'proj',   priority:'normal', due:'',           note:'' },
+  { id:14, col:'backlog',    title:'Медіакіт для Instagram',                       tag:'design',  assignee:'smm1',   priority:'low',    due:'',           note:'' },
+];
+
+// ── STATE ────────────────────────────────────────────────
+let cards = JSON.parse(JSON.stringify(DEFAULT_CARDS));
+let currentUser = null;
+let activeFilter = 'all';
+let dragId = null;
+let editId = null;
+let syncInterval = null;
+let saveTimer = null;
+
+// ── AUTH ─────────────────────────────────────────────────
+function doLogin() {
+  const role = document.getElementById('loginRole').value;
+  const pass = document.getElementById('loginPass').value;
+  if (!role || pass !== PASSWORD) {
+    document.getElementById('loginErr').style.display = 'block';
+    return;
+  }
+  currentUser = role;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('userLabel').textContent = ASSIGNEES[role].label;
+  loadCards();
+  syncInterval = setInterval(loadCards, 12000);
+}
+
+function doLogout() {
+  currentUser = null;
+  clearInterval(syncInterval);
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginErr').style.display = 'none';
+}
+
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ── STORAGE ──────────────────────────────────────────────
+async function loadCards() {
+  try {
+    const res = await window.storage.get(STORAGE_KEY, true);
+    if (res?.value) {
+      cards = JSON.parse(res.value);
+      document.getElementById('syncLabel').textContent = 'Синхронізовано ' + new Date().toLocaleTimeString('uk');
+    } else {
+      document.getElementById('syncLabel').textContent = 'Нова дошка — дані збережено';
+    }
+  } catch(e) {
+    document.getElementById('syncLabel').textContent = 'Офлайн режим';
+  }
+  render();
+}
+
+async function saveCards() {
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(cards), true);
+    document.getElementById('syncLabel').textContent = 'Збережено ' + new Date().toLocaleTimeString('uk');
+  } catch(e) {}
+}
+
+function updateCards(next) {
+  cards = next;
+  render();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveCards, 500);
+}
+
+// ── RENDER ───────────────────────────────────────────────
+function visible(col) {
+  return cards.filter(c => c.col === col && (
+    activeFilter === 'all' || c.assignee === activeFilter
+  ));
+}
+
+function dueInfo(due) {
+  if (!due) return null;
+  const diff = Math.round((new Date(due) - new Date(new Date().toDateString())) / 86400000);
+  if (diff < 0)   return { label: `⚠ прострочено`, color: '#e05252' };
+  if (diff === 0) return { label: '📌 сьогодні',   color: '#c9a84c' };
+  if (diff === 1) return { label: '⏰ завтра',      color: '#c9a84c' };
+  return { label: `📅 ${due.split('-').reverse().slice(0,2).join('.')}`, color: '#6b6560' };
+}
+
+function render() {
+  renderStats();
+  renderBoard();
+}
+
+function renderStats() {
+  const bar = document.getElementById('statsBar');
+  bar.innerHTML = Object.entries(COLS).map(([k,v]) =>
+    `<div class="stat"><div class="sd" style="background:${v.color}"></div><span>${v.name}</span><strong>${cards.filter(c=>c.col===k).length}</strong></div>`
+  ).join('') + `<div class="stat" style="border-color:rgba(201,168,76,0.25);background:rgba(201,168,76,0.06)"><span style="color:#c9a84c">Всього</span><strong style="color:#e8c97a">${cards.length}</strong></div>`;
+}
+
+function renderBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = Object.entries(COLS).map(([col, cv]) => {
+    const vis = visible(col);
+    return `
+    <div class="col" id="col-${col}" style="border-top:3px solid ${cv.color}"
+      ondragover="event.preventDefault();document.getElementById('col-${col}').classList.add('drag-over')"
+      ondragleave="document.getElementById('col-${col}').classList.remove('drag-over')"
+      ondrop="dropCard(event,'${col}')">
+      <div class="col-head">
+        <div class="col-title">
+          <div class="col-dot" style="background:${cv.color};box-shadow:0 0 8px ${cv.color}80"></div>
+          <span class="col-name" style="color:${cv.color}">${cv.name}</span>
+        </div>
+        <span class="col-count">${vis.length}</span>
+      </div>
+      <div class="col-body">${vis.map(c => cardHTML(c)).join('')}</div>
+      <button class="col-add-btn" onclick="openModal('${col}')">＋ Додати</button>
+    </div>`;
+  }).join('');
+
+  document.querySelectorAll('.card').forEach(el => {
+    el.addEventListener('dragstart', e => { dragId = parseInt(el.dataset.id); el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    el.addEventListener('dragend', () => { el.classList.remove('dragging'); document.querySelectorAll('.col').forEach(c=>c.classList.remove('drag-over')); });
+  });
+}
+
+function cardHTML(card) {
+  const a = ASSIGNEES[card.assignee];
+  const t = TAGS[card.tag] || TAGS.project;
+  const due = dueInfo(card.due);
+  const pClass = `p-${card.priority}`;
+  const canEdit = currentUser === 'owner' || currentUser === card.assignee || currentUser === 'proj';
+  return `
+  <div class="card" draggable="true" data-id="${card.id}">
+    <div class="card-top">
+      <span class="ctag" style="background:${t.bg};color:${t.color}">${card.tag}</span>
+      <div class="cpriority ${pClass}" title="${card.priority}"></div>
+    </div>
+    <div class="card-title">${card.title}</div>
+    ${card.note ? `<div style="font-size:11px;color:#5a5550;margin-bottom:8px;line-height:1.4">${card.note}</div>` : ''}
+    <div class="card-footer">
+      <div class="card-assignee">
+        <div class="cavatar" style="background:${a.color}18;border:1px solid ${a.color}30;color:${a.color}">${a.short}</div>
+        <span class="aname">${a.label}</span>
+      </div>
+      ${due ? `<span class="card-due" style="color:${due.color}">${due.label}</span>` : ''}
+    </div>
+    ${canEdit ? `
+    <div class="card-actions">
+      <button class="cact" onclick="editCard(${card.id})">✏ Редагувати</button>
+      <button class="cact del" onclick="deleteCard(${card.id})">✕ Видалити</button>
+    </div>` : ''}
+  </div>`;
+}
+
+// ── DRAG ─────────────────────────────────────────────────
+function dropCard(e, col) {
+  e.preventDefault();
+  document.querySelectorAll('.col').forEach(c => c.classList.remove('drag-over'));
+  if (!dragId) return;
+  updateCards(cards.map(c => c.id === dragId ? {...c, col} : c));
+  dragId = null;
+}
+
+// ── MODAL ─────────────────────────────────────────────────
+function openModal(col = 'todo', id = null) {
+  editId = id;
+  if (id) {
+    const card = cards.find(c => c.id === id);
+    document.getElementById('modalTitle').textContent = '✏ Редагувати';
+    document.getElementById('fTitle').value = card.title;
+    document.getElementById('fCol').value = card.col;
+    document.getElementById('fAssignee').value = card.assignee;
+    document.getElementById('fTag').value = card.tag;
+    document.getElementById('fPriority').value = card.priority;
+    document.getElementById('fDate').value = card.due;
+    document.getElementById('fNote').value = card.note || '';
+  } else {
+    document.getElementById('modalTitle').textContent = '＋ Нова задача';
+    document.getElementById('fTitle').value = '';
+    document.getElementById('fCol').value = col;
+    document.getElementById('fAssignee').value = currentUser || 'proj';
+    document.getElementById('fTag').value = 'project';
+    document.getElementById('fPriority').value = 'normal';
+    document.getElementById('fDate').value = '';
+    document.getElementById('fNote').value = '';
+  }
+  document.getElementById('modalBg').classList.add('open');
+  setTimeout(() => document.getElementById('fTitle').focus(), 80);
+}
+
+function closeModal() { document.getElementById('modalBg').classList.remove('open'); editId = null; }
+
+function saveCard() {
+  const title = document.getElementById('fTitle').value.trim();
+  if (!title) { document.getElementById('fTitle').style.borderColor='#e05252'; return; }
+  const data = {
+    title,
+    col:      document.getElementById('fCol').value,
+    assignee: document.getElementById('fAssignee').value,
+    tag:      document.getElementById('fTag').value,
+    priority: document.getElementById('fPriority').value,
+    due:      document.getElementById('fDate').value,
+    note:     document.getElementById('fNote').value.trim(),
+  };
+  if (editId) {
+    updateCards(cards.map(c => c.id === editId ? {...c, ...data} : c));
+  } else {
+    updateCards([...cards, { id: Date.now(), ...data }]);
+  }
+  closeModal();
+}
+
+function editCard(id) { openModal(null, id); }
+function deleteCard(id) { if (confirm('Видалити задачу?')) updateCards(cards.filter(c => c.id !== id)); }
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+document.getElementById('modalBg').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
