@@ -544,7 +544,7 @@ function doLogin() {
   document.getElementById('app').style.display = 'block';
   document.getElementById('userLabel').textContent = ASSIGNEES[role].label;
   loadCards();
-  syncInterval = setInterval(loadCards, 12000);
+  syncInterval = setInterval(loadCards, 60000);
 }
 
 function doLogout() {
